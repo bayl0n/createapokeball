@@ -1,0 +1,185 @@
+"use client";
+
+import { Clipboard, Download, RotateCcw, Share2, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { WebGLRenderer } from "three";
+import { useIsMobileViewport } from "../../hooks/useIsMobileViewport";
+import {
+  backdropClass,
+  backdropOptions,
+  defaultConfig,
+  finishOptions,
+  lightingOptions,
+  patternOptions,
+  type PokeballConfig,
+} from "../../lib/pokeball/config";
+import {
+  configToSearchParams,
+  readConfigFromUrl,
+} from "../../lib/pokeball/url";
+import { ColorControl } from "./controls/ColorControl";
+import { SegmentedControl } from "./controls/SegmentedControl";
+import { Scene } from "./scene/Scene";
+
+export function PokeballCustomizer() {
+  const [config, setConfig] = useState<PokeballConfig>(() =>
+    readConfigFromUrl(),
+  );
+  const [renderer, setRenderer] = useState<WebGLRenderer | null>(null);
+  const [copyStatus, setCopyStatus] = useState("Copy link");
+  const [exportStatus, setExportStatus] = useState("Download");
+  const isMobile = useIsMobileViewport();
+
+  useEffect(() => {
+    const params = configToSearchParams(config);
+    const nextUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, "", nextUrl);
+  }, [config]);
+
+  function updateConfig<K extends keyof PokeballConfig>(
+    key: K,
+    value: PokeballConfig[K],
+  ) {
+    setConfig((current) => ({ ...current, [key]: value }));
+  }
+
+  async function copyShareUrl() {
+    const url = `${window.location.origin}${window.location.pathname}?${configToSearchParams(config).toString()}`;
+    await navigator.clipboard.writeText(url);
+    setCopyStatus("Copied");
+    window.setTimeout(() => setCopyStatus("Copy link"), 1600);
+  }
+
+  function downloadImage() {
+    if (!renderer) return;
+
+    const link = document.createElement("a");
+    link.download = "create-a-pokeball.png";
+    link.href = renderer.domElement.toDataURL("image/png");
+    link.click();
+    setExportStatus("Saved");
+    window.setTimeout(() => setExportStatus("Download"), 1600);
+  }
+
+  return (
+    <main
+      className={`app-shell bg-gradient-to-br ${backdropClass[config.backdrop]}`}
+    >
+      <section className="stage-panel" aria-label="3D Pokeball preview">
+        <div className="brand-bar">
+          <button
+            className={`icon-pill ${config.spin ? "active" : ""}`}
+            onClick={() => updateConfig("spin", !config.spin)}
+            type="button"
+            title={config.spin ? "Pause rotation" : "Start rotation"}
+          >
+            <RotateCcw size={18} />
+          </button>
+        </div>
+        <div className="canvas-wrap">
+          <Scene
+            config={config}
+            isMobile={isMobile}
+            onRendererReady={setRenderer}
+          />
+        </div>
+      </section>
+
+      <aside
+        className="customizer-panel"
+        aria-label="Pokeball customization options"
+      >
+        <div className="panel-heading">
+          <div>
+            <p className="eyebrow">Design bench</p>
+            <h2>Make it yours</h2>
+          </div>
+          <Sparkles size={21} />
+        </div>
+
+        <div className="panel-content">
+          <ColorControl
+            label="Top shell"
+            value={config.topColor}
+            onChange={(value) => updateConfig("topColor", value)}
+          />
+          <ColorControl
+            label="Bottom shell"
+            value={config.bottomColor}
+            onChange={(value) => updateConfig("bottomColor", value)}
+          />
+          <ColorControl
+            label="Center band"
+            value={config.bandColor}
+            onChange={(value) => updateConfig("bandColor", value)}
+          />
+          <ColorControl
+            label="Button"
+            value={config.buttonColor}
+            onChange={(value) => updateConfig("buttonColor", value)}
+          />
+          <ColorControl
+            label="Button highlight"
+            value={config.buttonHighlightColor}
+            onChange={(value) => updateConfig("buttonHighlightColor", value)}
+          />
+
+          <SegmentedControl
+            label="Finish"
+            value={config.finish}
+            onChange={(value) => updateConfig("finish", value)}
+            options={finishOptions}
+          />
+
+          <SegmentedControl
+            label="Pattern"
+            value={config.pattern}
+            onChange={(value) => updateConfig("pattern", value)}
+            options={patternOptions}
+          />
+
+          <SegmentedControl
+            label="Lighting"
+            value={config.lighting}
+            onChange={(value) => updateConfig("lighting", value)}
+            options={lightingOptions}
+          />
+
+          <SegmentedControl
+            label="Backdrop"
+            value={config.backdrop}
+            onChange={(value) => updateConfig("backdrop", value)}
+            options={backdropOptions}
+          />
+        </div>
+
+        <div className="action-grid">
+          <button
+            className="primary-action"
+            onClick={copyShareUrl}
+            type="button"
+          >
+            <Share2 size={17} />
+            {copyStatus}
+          </button>
+          <button
+            className="secondary-action"
+            onClick={downloadImage}
+            type="button"
+          >
+            <Download size={17} />
+            {exportStatus}
+          </button>
+          <button
+            className="secondary-action wide"
+            onClick={() => setConfig(defaultConfig)}
+            type="button"
+          >
+            <Clipboard size={17} />
+            Reset classic design
+          </button>
+        </div>
+      </aside>
+    </main>
+  );
+}
