@@ -1,5 +1,9 @@
 import { defaultConfig, type PokeballConfig } from "./config";
 
+type SearchParamValue = string | string[] | undefined;
+type SearchParamsRecord = Record<string, SearchParamValue>;
+type ConfigSearchParams = URLSearchParams | SearchParamsRecord;
+
 const queryKeys = {
   topColor: "top",
   bottomColor: "bottom",
@@ -17,23 +21,29 @@ function isHexColor(value: string | null): value is string {
   return Boolean(value?.match(/^#[0-9a-fA-F]{6}$/));
 }
 
-export function readConfigFromUrl(): PokeballConfig {
-  if (typeof window === "undefined") {
-    return defaultConfig;
+function getParam(params: ConfigSearchParams, key: string) {
+  if (params instanceof URLSearchParams) {
+    return params.get(key);
   }
 
-  const params = new URLSearchParams(window.location.search);
+  const value = params[key];
+  return Array.isArray(value) ? value[0] ?? null : value ?? null;
+}
+
+export function parseConfigFromSearchParams(
+  params: ConfigSearchParams,
+): PokeballConfig {
   const next = { ...defaultConfig };
-  const top = params.get(queryKeys.topColor);
-  const bottom = params.get(queryKeys.bottomColor);
-  const band = params.get(queryKeys.bandColor);
-  const button = params.get(queryKeys.buttonColor);
-  const highlight = params.get(queryKeys.buttonHighlightColor);
-  const finish = params.get(queryKeys.finish);
-  const pattern = params.get(queryKeys.pattern);
-  const lighting = params.get(queryKeys.lighting);
-  const backdrop = params.get(queryKeys.backdrop);
-  const spin = params.get(queryKeys.spin);
+  const top = getParam(params, queryKeys.topColor);
+  const bottom = getParam(params, queryKeys.bottomColor);
+  const band = getParam(params, queryKeys.bandColor);
+  const button = getParam(params, queryKeys.buttonColor);
+  const highlight = getParam(params, queryKeys.buttonHighlightColor);
+  const finish = getParam(params, queryKeys.finish);
+  const pattern = getParam(params, queryKeys.pattern);
+  const lighting = getParam(params, queryKeys.lighting);
+  const backdrop = getParam(params, queryKeys.backdrop);
+  const spin = getParam(params, queryKeys.spin);
 
   if (isHexColor(top)) next.topColor = top;
   if (isHexColor(bottom)) next.bottomColor = bottom;
@@ -65,6 +75,16 @@ export function readConfigFromUrl(): PokeballConfig {
   if (spin === "0" || spin === "1") next.spin = spin === "1";
 
   return next;
+}
+
+export function readConfigFromUrl(): PokeballConfig {
+  if (typeof window === "undefined") {
+    return defaultConfig;
+  }
+
+  return parseConfigFromSearchParams(
+    new URLSearchParams(window.location.search),
+  );
 }
 
 export function configToSearchParams(config: PokeballConfig) {

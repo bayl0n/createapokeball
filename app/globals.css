@@ -46,7 +46,7 @@ button {
 
 .stage-panel {
   display: grid;
-  grid-template-rows: auto minmax(420px, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: 100vh;
   min-height: 100svh;
   min-width: 0;
@@ -100,7 +100,9 @@ h2 {
   display: inline-flex;
   height: 44px;
   justify-content: center;
-  transition: background 160ms ease, transform 160ms ease;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
   width: 44px;
 }
 
@@ -141,6 +143,7 @@ h2 {
   max-height: 100vh;
   overflow: hidden;
   min-width: 0;
+  position: relative;
   width: 100%;
 }
 
@@ -225,7 +228,9 @@ h2 {
   color: var(--text);
   min-height: 42px;
   padding: 9px 10px;
-  transition: background 160ms ease, border-color 160ms ease;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
   white-space: normal;
   overflow-wrap: anywhere;
 }
@@ -305,6 +310,7 @@ h2 {
 
   .canvas-wrap {
     height: clamp(340px, 56svh, 520px);
+    min-height: 0;
   }
 
   .customizer-panel {
@@ -327,13 +333,19 @@ h2 {
 }
 
 @media (max-width: 620px) {
+  .app-shell {
+    grid-template-rows: minmax(0, 50dvh) minmax(0, 50dvh);
+  }
+
   .stage-panel {
-    grid-template-rows: auto auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 50dvh;
+    max-height: 50dvh;
     padding: 12px;
   }
 
   .canvas-wrap {
-    height: clamp(220px, 30dvh, 300px);
+    height: 100%;
   }
 
   .brand-bar {
@@ -364,11 +376,34 @@ h2 {
     padding-right: 12px;
   }
 
+  .panel-heading {
+    min-height: 62px;
+    padding-bottom: 12px;
+    padding-right: 156px;
+    padding-top: 12px;
+  }
+
+  .panel-heading > svg {
+    display: none;
+  }
+
+  .customizer-panel {
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 50dvh;
+    max-height: 50dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
   .panel-content {
     gap: 16px;
     grid-template-columns: 1fr;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding-top: 18px;
     padding-bottom: 18px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .swatch-row {
@@ -376,12 +411,42 @@ h2 {
   }
 
   .swatch {
-    min-height: 38px;
+    min-height: 32px;
   }
 
   .action-grid {
-    grid-template-columns: 1fr;
-    padding-bottom: 18px;
+    border-top: 0;
+    gap: 8px;
+    grid-auto-flow: column;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 0;
+    position: absolute;
+    right: 12px;
+    top: 11px;
+    width: 132px;
+    z-index: 2;
+  }
+
+  .primary-action,
+  .secondary-action {
+    height: 40px;
+    min-height: 40px;
+    min-width: 0;
+    padding: 9px;
+    width: 100%;
+  }
+
+  .action-label {
+    border: 0;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
   }
 
   .wide {
@@ -391,12 +456,12 @@ h2 {
 
 @media (max-width: 380px) {
   .stage-panel {
-    grid-template-rows: auto auto;
+    grid-template-rows: auto minmax(0, 1fr);
     padding: 10px;
   }
 
   .canvas-wrap {
-    height: clamp(200px, 28dvh, 260px);
+    height: 100%;
   }
 
   .panel-heading,
@@ -406,11 +471,20 @@ h2 {
     padding-right: 10px;
   }
 
+  .panel-heading {
+    padding-right: 142px;
+  }
+
+  .action-grid {
+    padding: 0;
+    right: 10px;
+    width: 124px;
+  }
+
   h1 {
     font-size: 1.8rem;
   }
 
-  .swatch-row,
   .segment-grid,
   .action-grid {
     gap: 7px;

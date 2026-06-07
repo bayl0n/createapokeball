@@ -9,6 +9,8 @@ export function ColorControl({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const selectedColor = value.toLowerCase();
+
   return (
     <div className="control-block">
       <div className="control-label">
@@ -25,7 +27,7 @@ export function ColorControl({
         {colorPresets.map((color) => (
           <button
             aria-label={`${label} ${color}`}
-            className={`swatch ${value.toLowerCase() === color ? "selected" : ""}`}
+            className={`swatch ${selectedColor === color.toLowerCase() ? "selected" : ""}`}
             key={`${label}-${color}`}
             onClick={() => onChange(color)}
             style={{ backgroundColor: color }}

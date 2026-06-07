@@ -3,7 +3,6 @@
 import { Clipboard, Download, RotateCcw, Share2, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { WebGLRenderer } from "three";
-import { useIsMobileViewport } from "../../hooks/useIsMobileViewport";
 import {
   backdropClass,
   backdropOptions,
@@ -13,22 +12,20 @@ import {
   patternOptions,
   type PokeballConfig,
 } from "../../lib/pokeball/config";
-import {
-  configToSearchParams,
-  readConfigFromUrl,
-} from "../../lib/pokeball/url";
+import { configToSearchParams } from "../../lib/pokeball/url";
 import { ColorControl } from "./controls/ColorControl";
 import { SegmentedControl } from "./controls/SegmentedControl";
 import { Scene } from "./scene/Scene";
 
-export function PokeballCustomizer() {
-  const [config, setConfig] = useState<PokeballConfig>(() =>
-    readConfigFromUrl(),
-  );
+export function PokeballCustomizer({
+  initialConfig,
+}: {
+  initialConfig: PokeballConfig;
+}) {
+  const [config, setConfig] = useState<PokeballConfig>(initialConfig);
   const [renderer, setRenderer] = useState<WebGLRenderer | null>(null);
   const [copyStatus, setCopyStatus] = useState("Copy link");
   const [exportStatus, setExportStatus] = useState("Download");
-  const isMobile = useIsMobileViewport();
 
   useEffect(() => {
     const params = configToSearchParams(config);
@@ -77,11 +74,7 @@ export function PokeballCustomizer() {
           </button>
         </div>
         <div className="canvas-wrap">
-          <Scene
-            config={config}
-            isMobile={isMobile}
-            onRendererReady={setRenderer}
-          />
+          <Scene config={config} onRendererReady={setRenderer} />
         </div>
       </section>
 
@@ -91,8 +84,8 @@ export function PokeballCustomizer() {
       >
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">Design bench</p>
-            <h2>Make it yours</h2>
+            <p className="eyebrow">PokeLab</p>
+            <h2>Customize Your Pokeball</h2>
           </div>
           <Sparkles size={21} />
         </div>
@@ -155,28 +148,34 @@ export function PokeballCustomizer() {
 
         <div className="action-grid">
           <button
+            aria-label={copyStatus}
             className="primary-action"
             onClick={copyShareUrl}
+            title={copyStatus}
             type="button"
           >
             <Share2 size={17} />
-            {copyStatus}
+            <span className="action-label">{copyStatus}</span>
           </button>
           <button
+            aria-label={exportStatus}
             className="secondary-action"
             onClick={downloadImage}
+            title={exportStatus}
             type="button"
           >
             <Download size={17} />
-            {exportStatus}
+            <span className="action-label">{exportStatus}</span>
           </button>
           <button
+            aria-label="Reset classic design"
             className="secondary-action wide"
             onClick={() => setConfig(defaultConfig)}
+            title="Reset classic design"
             type="button"
           >
             <Clipboard size={17} />
-            Reset classic design
+            <span className="action-label">Reset classic design</span>
           </button>
         </div>
       </aside>

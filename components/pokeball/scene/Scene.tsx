@@ -1,24 +1,104 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import {
   ContactShadows,
   Environment,
   OrbitControls,
   PerspectiveCamera,
 } from "@react-three/drei";
-import { Suspense } from "react";
-import type { WebGLRenderer } from "three";
+import { Suspense, useLayoutEffect, useRef } from "react";
+import { Vector3 } from "three";
+import type {
+  PerspectiveCamera as ThreePerspectiveCamera,
+  WebGLRenderer,
+} from "three";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import type { PokeballConfig } from "../../../lib/pokeball/config";
+import { shellRadius } from "../../../lib/pokeball/dimensions";
 import { Pokeball } from "./Pokeball";
+
+const cameraTarget: [number, number, number] = [0, 0, 0];
+const cameraFov = 38;
+const cameraYOffset = 0.42;
+const framingRadius = shellRadius * 1.16;
+const minCameraDistance = 4.6;
+const maxCameraDistance = 20;
+
+function CameraRig() {
+  const cameraRef = useRef<ThreePerspectiveCamera>(null);
+  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const targetRef = useRef(new Vector3(...cameraTarget));
+  const viewDirectionRef = useRef(new Vector3(0, cameraYOffset, 1).normalize());
+  const { size } = useThree();
+
+  useLayoutEffect(() => {
+    const perspectiveCamera = cameraRef.current;
+    if (!perspectiveCamera || size.width <= 0 || size.height <= 0) return;
+
+    const target = targetRef.current.set(...cameraTarget);
+    const controls = controlsRef.current;
+    const viewDirection = viewDirectionRef.current
+      .copy(perspectiveCamera.position)
+      .sub(controls?.target ?? target);
+
+    if (viewDirection.lengthSq() < 0.0001) {
+      viewDirection.set(0, cameraYOffset, 1);
+    }
+
+    viewDirection.normalize();
+
+    const aspect = size.width / size.height;
+    const verticalFov = (cameraFov * Math.PI) / 180;
+    const horizontalFov =
+      2 * Math.atan(Math.tan(verticalFov / 2) * Math.max(aspect, 0.1));
+    const fitDistance = Math.max(
+      framingRadius / Math.sin(verticalFov / 2),
+      framingRadius / Math.sin(horizontalFov / 2),
+      minCameraDistance,
+    );
+
+    perspectiveCamera.fov = cameraFov;
+    perspectiveCamera.aspect = aspect;
+    perspectiveCamera.position
+      .copy(target)
+      .addScaledVector(viewDirection, fitDistance);
+    perspectiveCamera.lookAt(target);
+    perspectiveCamera.updateProjectionMatrix();
+
+    if (controls) {
+      controls.target.copy(target);
+      controls.minDistance = minCameraDistance;
+      controls.maxDistance = maxCameraDistance;
+      controls.update();
+    }
+  }, [size.height, size.width]);
+
+  return (
+    <>
+      <PerspectiveCamera
+        ref={cameraRef}
+        makeDefault
+        position={[0, cameraYOffset, 6.8]}
+        fov={cameraFov}
+      />
+      <OrbitControls
+        ref={controlsRef}
+        enablePan={false}
+        target={cameraTarget}
+        minDistance={minCameraDistance}
+        maxDistance={maxCameraDistance}
+        autoRotate={false}
+      />
+    </>
+  );
+}
 
 export function Scene({
   config,
-  isMobile,
   onRendererReady,
 }: {
   config: PokeballConfig;
-  isMobile: boolean;
   onRendererReady: (renderer: WebGLRenderer) => void;
 }) {
   const lightColor =
@@ -34,23 +114,13 @@ export function Scene({
       : config.lighting === "night"
         ? 2.8
         : 3.8;
-  const cameraPosition: [number, number, number] = isMobile
-    ? [0, 0.45, 7.1]
-    : [0, 0.55, 6.2];
-  const cameraFov = isMobile ? 40 : 38;
-  const minDistance = isMobile ? 5.4 : 4;
-
   return (
     <Canvas
       shadows
       gl={{ antialias: true, preserveDrawingBuffer: true }}
       onCreated={({ gl }) => onRendererReady(gl)}
     >
-      <PerspectiveCamera
-        makeDefault
-        position={cameraPosition}
-        fov={cameraFov}
-      />
+      <CameraRig />
       <ambientLight intensity={ambient} />
       <directionalLight
         position={[4, 5, 4]}
@@ -83,12 +153,6 @@ export function Scene({
           scale={7}
         />
       </Suspense>
-      <OrbitControls
-        enablePan={false}
-        minDistance={minDistance}
-        maxDistance={20}
-        autoRotate={false}
-      />
     </Canvas>
   );
 }
