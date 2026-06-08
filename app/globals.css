@@ -49,9 +49,6 @@ button {
   grid-template-rows: auto minmax(0, 1fr);
   min-height: 100vh;
   min-height: 100svh;
-  min-width: 0;
-  padding: 0;
-  width: 100%;
 }
 
 .brand-bar {
@@ -130,8 +127,6 @@ h2 {
 
 .canvas-wrap canvas {
   display: block;
-  height: 100% !important;
-  width: 100% !important;
 }
 
 .customizer-panel {
@@ -306,7 +301,6 @@ h2 {
     grid-template-rows: auto auto;
     min-height: 0;
     overflow: hidden;
-    padding: 20px;
   }
 
   .canvas-wrap {
@@ -342,7 +336,6 @@ h2 {
     grid-template-rows: auto minmax(0, 1fr);
     height: 50dvh;
     max-height: 50dvh;
-    padding: 12px;
   }
 
   .canvas-wrap {
@@ -458,7 +451,6 @@ h2 {
 @media (max-width: 380px) {
   .stage-panel {
     grid-template-rows: auto minmax(0, 1fr);
-    padding: 10px;
   }
 
   .canvas-wrap {

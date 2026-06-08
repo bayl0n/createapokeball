@@ -85,7 +85,7 @@ export function PokeballCustomizer({
         <div className="panel-heading">
           <div>
             <p className="eyebrow">PokeLab</p>
-            <h2>Customize Your Pokeball</h2>
+            <h2>Create a Pokeball!</h2>
           </div>
           <Sparkles size={21} />
         </div>
