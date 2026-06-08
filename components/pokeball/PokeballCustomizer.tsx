@@ -1,6 +1,6 @@
 "use client";
 
-import { Clipboard, Download, RotateCcw, Share2, Sparkles } from "lucide-react";
+import { RotateCcw, Download, Rotate3d, Share2, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { WebGLRenderer } from "three";
 import {
@@ -70,7 +70,7 @@ export function PokeballCustomizer({
             type="button"
             title={config.spin ? "Pause rotation" : "Start rotation"}
           >
-            <RotateCcw size={18} />
+            <Rotate3d size={18} />
           </button>
         </div>
         <div className="canvas-wrap">
@@ -174,7 +174,7 @@ export function PokeballCustomizer({
             title="Reset classic design"
             type="button"
           >
-            <Clipboard size={17} />
+            <RotateCcw size={17} />
             <span className="action-label">Reset classic design</span>
           </button>
         </div>

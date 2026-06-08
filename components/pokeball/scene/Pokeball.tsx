@@ -54,7 +54,7 @@ export function Pokeball({ config }: { config: PokeballConfig }) {
 
   return (
     <RotatingGroup config={config}>
-      <group rotation={[0.16, -0.42, 0]}>
+      <group rotation={[0, 0, 0]}>
         <Float speed={1.3} rotationIntensity={0.06} floatIntensity={0.12}>
           <mesh castShadow receiveShadow>
             <sphereGeometry
