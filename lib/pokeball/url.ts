@@ -1,4 +1,8 @@
-import { defaultConfig, type PokeballConfig } from "./config";
+import {
+  defaultConfig,
+  letteringMaxLength,
+  type PokeballConfig,
+} from "./config";
 
 type SearchParamValue = string | string[] | undefined;
 type SearchParamsRecord = Record<string, SearchParamValue>;
@@ -10,6 +14,9 @@ const queryKeys = {
   bandColor: "band",
   buttonColor: "button",
   buttonHighlightColor: "highlight",
+  patternColor: "patternColor",
+  letteringText: "text",
+  letteringColor: "textColor",
   finish: "finish",
   pattern: "pattern",
   lighting: "lighting",
@@ -19,6 +26,10 @@ const queryKeys = {
 
 function isHexColor(value: string | null): value is string {
   return Boolean(value?.match(/^#[0-9a-fA-F]{6}$/));
+}
+
+function sanitizeLetteringText(value: string | null) {
+  return (value ?? "").slice(0, letteringMaxLength);
 }
 
 function getParam(params: ConfigSearchParams, key: string) {
@@ -39,6 +50,9 @@ export function parseConfigFromSearchParams(
   const band = getParam(params, queryKeys.bandColor);
   const button = getParam(params, queryKeys.buttonColor);
   const highlight = getParam(params, queryKeys.buttonHighlightColor);
+  const patternColor = getParam(params, queryKeys.patternColor);
+  const letteringText = getParam(params, queryKeys.letteringText);
+  const letteringColor = getParam(params, queryKeys.letteringColor);
   const finish = getParam(params, queryKeys.finish);
   const pattern = getParam(params, queryKeys.pattern);
   const lighting = getParam(params, queryKeys.lighting);
@@ -50,6 +64,9 @@ export function parseConfigFromSearchParams(
   if (isHexColor(band)) next.bandColor = band;
   if (isHexColor(button)) next.buttonColor = button;
   if (isHexColor(highlight)) next.buttonHighlightColor = highlight;
+  if (isHexColor(patternColor)) next.patternColor = patternColor;
+  next.letteringText = sanitizeLetteringText(letteringText);
+  if (isHexColor(letteringColor)) next.letteringColor = letteringColor;
   if (finish === "glossy" || finish === "matte" || finish === "metallic") {
     next.finish = finish;
   }
@@ -57,7 +74,8 @@ export function parseConfigFromSearchParams(
     pattern === "classic" ||
     pattern === "stripe" ||
     pattern === "split" ||
-    pattern === "accent"
+    pattern === "accent" ||
+    pattern === "ultra"
   ) {
     next.pattern = pattern;
   }
@@ -94,6 +112,12 @@ export function configToSearchParams(config: PokeballConfig) {
   params.set(queryKeys.bandColor, config.bandColor);
   params.set(queryKeys.buttonColor, config.buttonColor);
   params.set(queryKeys.buttonHighlightColor, config.buttonHighlightColor);
+  params.set(queryKeys.patternColor, config.patternColor);
+  params.set(
+    queryKeys.letteringText,
+    config.letteringText.slice(0, letteringMaxLength),
+  );
+  params.set(queryKeys.letteringColor, config.letteringColor);
   params.set(queryKeys.finish, config.finish);
   params.set(queryKeys.pattern, config.pattern);
   params.set(queryKeys.lighting, config.lighting);

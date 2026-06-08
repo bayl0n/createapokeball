@@ -1,5 +1,6 @@
 export type Finish = "glossy" | "matte" | "metallic";
-export type Pattern = "classic" | "stripe" | "split" | "accent";
+export type Pattern = "classic" | "stripe" | "split" | "accent" | "ultra";
+export type ShellTexturePreset = "none" | "accent" | "ultra";
 export type Lighting = "studio" | "sunset" | "night";
 export type Backdrop = "graphite" | "sky" | "mint" | "plum";
 
@@ -9,6 +10,9 @@ export type PokeballConfig = {
   bandColor: string;
   buttonColor: string;
   buttonHighlightColor: string;
+  patternColor: string;
+  letteringText: string;
+  letteringColor: string;
   finish: Finish;
   pattern: Pattern;
   lighting: Lighting;
@@ -16,12 +20,24 @@ export type PokeballConfig = {
   spin: boolean;
 };
 
+export const letteringMaxLength = 14;
+
+export function shellTexturePresetForPattern(
+  pattern: Pattern,
+): ShellTexturePreset {
+  if (pattern === "accent" || pattern === "ultra") return pattern;
+  return "none";
+}
+
 export const defaultConfig: PokeballConfig = {
   topColor: "#e53935",
   bottomColor: "#f7f7f2",
   bandColor: "#18181b",
   buttonColor: "#f8fafc",
   buttonHighlightColor: "#ffffff",
+  patternColor: "#facc15",
+  letteringText: "",
+  letteringColor: "#facc15",
   finish: "glossy",
   pattern: "classic",
   lighting: "studio",
@@ -69,6 +85,7 @@ export const patternOptions: { label: string; value: Pattern }[] = [
   { label: "Stripe", value: "stripe" },
   { label: "Split", value: "split" },
   { label: "Accent", value: "accent" },
+  { label: "Ultra", value: "ultra" },
 ];
 
 export const lightingOptions: { label: string; value: Lighting }[] = [

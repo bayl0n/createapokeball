@@ -4,7 +4,10 @@ import { useFrame } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import { useMemo, useRef, type ReactNode } from "react";
 import type { Group } from "three";
-import type { PokeballConfig } from "../../../lib/pokeball/config";
+import {
+  shellTexturePresetForPattern,
+  type PokeballConfig,
+} from "../../../lib/pokeball/config";
 import {
   buttonFaceDepth,
   buttonFaceRadius,
@@ -19,8 +22,10 @@ import {
   ButtonSocket,
   EquatorBand,
   getShellMaterial,
+  LetteringDecal,
   PatternGeometry,
   ShellCap,
+  useShellTexture,
 } from "./parts";
 
 function RotatingGroup({
@@ -43,9 +48,26 @@ function RotatingGroup({
 
 export function Pokeball({ config }: { config: PokeballConfig }) {
   const material = getShellMaterial(config);
+  const shellTexturePreset = shellTexturePresetForPattern(config.pattern);
+  const topShellTexture = useShellTexture({
+    shellColor: config.topColor,
+    patternColor: config.patternColor,
+    preset: shellTexturePreset,
+    side: "top",
+  });
+  const topMaterialKey = [
+    shellTexturePreset,
+    config.topColor,
+    config.patternColor,
+    config.finish,
+  ].join("-");
   const topMaterial = useMemo(
-    () => ({ color: config.topColor, ...material }),
-    [config.topColor, material],
+    () => ({
+      color: topShellTexture ? "#ffffff" : config.topColor,
+      map: topShellTexture,
+      ...material,
+    }),
+    [config.topColor, material, topShellTexture],
   );
   const bottomMaterial = useMemo(
     () => ({ color: config.bottomColor, ...material }),
@@ -68,7 +90,8 @@ export function Pokeball({ config }: { config: PokeballConfig }) {
                 Math.PI / 2 - grooveAngle,
               ]}
             />
-            <meshStandardMaterial {...topMaterial} />
+            <meshStandardMaterial key={topMaterialKey} {...topMaterial} />
+            <LetteringDecal config={config} />
           </mesh>
           <ShellCap color={config.topColor} side="top" material={material} />
           <mesh castShadow receiveShadow>

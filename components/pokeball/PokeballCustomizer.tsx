@@ -8,6 +8,7 @@ import {
   backdropOptions,
   defaultConfig,
   finishOptions,
+  letteringMaxLength,
   lightingOptions,
   patternOptions,
   type PokeballConfig,
@@ -38,6 +39,13 @@ export function PokeballCustomizer({
     value: PokeballConfig[K],
   ) {
     setConfig((current) => ({ ...current, [key]: value }));
+  }
+
+  function updatePattern(value: PokeballConfig["pattern"]) {
+    setConfig((current) => ({
+      ...current,
+      pattern: value,
+    }));
   }
 
   async function copyShareUrl() {
@@ -124,11 +132,41 @@ export function PokeballCustomizer({
             options={finishOptions}
           />
 
-          <SegmentedControl
+          {/* <SegmentedControl
             label="Pattern"
             value={config.pattern}
-            onChange={(value) => updateConfig("pattern", value)}
+            onChange={updatePattern}
             options={patternOptions}
+          />
+          <ColorControl
+            label="Pattern color"
+            value={config.patternColor}
+            onChange={(value) => updateConfig("patternColor", value)}
+          /> */}
+
+          <div className="control-block">
+            <label className="section-label" htmlFor="lettering-text">
+              Lettering
+            </label>
+            <input
+              className="text-input"
+              id="lettering-text"
+              maxLength={letteringMaxLength}
+              placeholder="Add text"
+              type="text"
+              value={config.letteringText}
+              onChange={(event) =>
+                updateConfig(
+                  "letteringText",
+                  event.target.value.slice(0, letteringMaxLength),
+                )
+              }
+            />
+          </div>
+          <ColorControl
+            label="Lettering color"
+            value={config.letteringColor}
+            onChange={(value) => updateConfig("letteringColor", value)}
           />
 
           <SegmentedControl
